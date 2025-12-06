@@ -1,19 +1,129 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Zap } from 'lucide-react';
+import { RefreshCw, Zap, Ticket } from 'lucide-react';
 import { WordData, WORDS } from '../data';
 import { Cookie } from './Cookie';
 import confetti from 'canvas-confetti';
+import html2canvas from 'html2canvas'; // Assuming environment has this, or usage matches script
+
+// Sound Logic
+const playSound = (type: 'click' | 'spin' | 'pop' | 'print') => {
+    try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+            osc.start(now);
+            osc.stop(now + 0.05);
+        } else if (type === 'spin') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.linearRampToValueAtTime(200, now + 0.2);
+            gain.gain.setValueAtTime(0.05, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === 'pop') {
+            osc.disconnect();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+            notes.forEach((freq, i) => {
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine';
+                o.frequency.value = freq;
+                o.connect(g);
+                g.connect(ctx.destination);
+                
+                const start = now + (i * 0.05);
+                g.gain.setValueAtTime(0, start);
+                g.gain.linearRampToValueAtTime(0.1, start + 0.02);
+                g.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
+                
+                o.start(start);
+                o.stop(start + 0.3);
+            });
+        } else if (type === 'print') {
+           osc.type = 'triangle';
+           osc.frequency.setValueAtTime(800, now);
+           osc.frequency.linearRampToValueAtTime(100, now + 0.5);
+           gain.gain.setValueAtTime(0.05, now);
+           gain.gain.linearRampToValueAtTime(0, now + 0.5);
+           osc.start(now);
+           osc.stop(now + 0.5);
+        }
+    } catch (e) {
+        console.error("Sound play failed", e);
+    }
+};
+
+const ReceiptTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string }>(({ word, date }, ref) => {
+    if (!word) return null;
+
+    return (
+        <div ref={ref} className="bg-white p-6 w-[320px] text-black font-mono flex flex-col items-center border-b-4 border-dashed border-gray-300 relative leading-tight">
+            {/* Texture overlay */}
+            <div className="absolute inset-0 bg-[#fffdf0] opacity-50 pointer-events-none"></div>
+            
+            <div className="relative z-10 w-full flex flex-col items-center gap-4 text-center">
+                <div className="flex flex-col items-center gap-1 border-b-2 border-black w-full pb-4">
+                    <h2 className="text-xl font-bold tracking-tight uppercase">Hangeul Vending</h2>
+                    <p className="text-xs text-gray-500">{date}</p>
+                    <p className="text-xs text-gray-500">No. {Math.floor(Math.random()*10000).toString().padStart(4, '0')}</p>
+                </div>
+
+                <div className="py-2">
+                     {/* Font should ideally be loaded in index.html for this to render correctly in canvas */}
+                     <p className="font-korean text-5xl mb-2">{word.ko}</p>
+                     <p className="text-sm font-bold uppercase tracking-wider">[{word.romaji}]</p>
+                </div>
+
+                <div className="w-full border-t border-dashed border-black py-4">
+                     <div className="flex justify-between text-sm mb-1">
+                         <span>ITEM</span>
+                         <span className="font-bold">{word.en.toUpperCase()}</span>
+                     </div>
+                     <div className="flex justify-between text-sm">
+                         <span>PRICE</span>
+                         <span>0 WON</span>
+                     </div>
+                </div>
+
+                <div className="w-full border-t border-dashed border-black pt-4 pb-2">
+                    <p className="text-xs italic leading-normal">
+                        "{word.sentence}"
+                    </p>
+                </div>
+                
+                <div className="mt-2 w-full flex flex-col items-center gap-1">
+                    {/* Fake Barcode */}
+                    <div className="h-10 w-3/4 bg-black" style={{ maskImage: 'repeating-linear-gradient(90deg, black, black 2px, transparent 2px, transparent 4px)', WebkitMaskImage: 'repeating-linear-gradient(90deg, black, black 2px, transparent 2px, transparent 4px)' }}></div>
+                    <p className="text-[10px] tracking-[0.5em]">THANK YOU</p>
+                </div>
+            </div>
+        </div>
+    );
+});
 
 export const VendingMachine: React.FC = () => {
   const [currentWord, setCurrentWord] = useState<WordData | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
-  // Removed flavor state to enforce yellow styling for all cookies
-  
-  // State to track which words haven't been shown yet
   const [availableIndices, setAvailableIndices] = useState<number[]>([]);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
-  // Initialize the "deck" of cards
   useEffect(() => {
     resetDeck();
   }, []);
@@ -23,37 +133,31 @@ export const VendingMachine: React.FC = () => {
     setAvailableIndices(indices);
   };
 
-  const playSound = () => {
-    // Placeholder for sound
-  };
-
   const handleDispense = () => {
     if (isSpinning) return;
     
+    playSound('click');
+    playSound('spin');
     setIsSpinning(true);
     setCurrentWord(null); 
-    playSound();
 
     setTimeout(() => {
-      // Logic to pick a unique word
       let nextIndices = [...availableIndices];
       
-      // If we ran out of words, reset the deck so the game can continue
       if (nextIndices.length === 0) {
         nextIndices = Array.from({ length: WORDS.length }, (_, i) => i);
       }
 
-      // Pick a random index from the available pool
       const randomIndexInPool = Math.floor(Math.random() * nextIndices.length);
       const selectedWordIndex = nextIndices[randomIndexInPool];
       
-      // Remove the selected index from the pool
       nextIndices.splice(randomIndexInPool, 1);
       
       setAvailableIndices(nextIndices);
       setCurrentWord(WORDS[selectedWordIndex]);
       
       setIsSpinning(false);
+      playSound('pop');
       
       confetti({
         particleCount: 150,
@@ -65,12 +169,30 @@ export const VendingMachine: React.FC = () => {
     }, 800);
   };
 
+  const handleDownloadReceipt = async () => {
+    if (!receiptRef.current || !currentWord) return;
+    playSound('click');
+    playSound('print');
+    
+    try {
+        const canvas = await html2canvas(receiptRef.current, {
+            scale: 2,
+            backgroundColor: null,
+        });
+        
+        const link = document.createElement('a');
+        link.download = `hangeul-receipt-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error("Receipt generation failed", err);
+    }
+  };
+
   const renderCookies = (word: WordData) => {
     const chars = word.ko.split('');
     const len = chars.length;
 
-    // Split logic: breaks nicely for 4 chars (2x2), 5 chars (3x2 or 2x3)
-    // For simplicity, if >= 4 chars, we split into two rows.
     if (len >= 4) {
       const splitIndex = Math.ceil(len / 2);
       const topRow = chars.slice(0, splitIndex);
@@ -92,7 +214,6 @@ export const VendingMachine: React.FC = () => {
       );
     }
 
-    // Default single row
     return (
       <div className="flex flex-wrap justify-center gap-2">
         {chars.map((char, index) => (
@@ -108,13 +229,10 @@ export const VendingMachine: React.FC = () => {
 
   return (
     <div className="w-full max-w-[420px] mx-auto relative group">
-      {/* Retro 3D decorative back panel */}
       <div className="absolute inset-0 bg-black rounded-[2.5rem] translate-x-4 translate-y-4 md:translate-x-5 md:translate-y-5"></div>
 
-      {/* Machine Frame */}
       <div className="bg-yellow-400 rounded-[2.5rem] border-[6px] border-black relative overflow-hidden flex flex-col">
         
-        {/* Top Header Panel */}
         <div className="bg-yellow-400 p-4 text-center border-b-[6px] border-black flex items-center justify-between px-6">
             <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-black"></div>
@@ -127,9 +245,7 @@ export const VendingMachine: React.FC = () => {
             </div>
         </div>
 
-        {/* Display Area */}
         <div className="relative min-h-[26rem] bg-purple-50 flex items-center justify-center p-6 overflow-hidden">
-            {/* Grid Pattern */}
             <div className="absolute inset-0 opacity-10" 
                 style={{ 
                     backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', 
@@ -158,19 +274,16 @@ export const VendingMachine: React.FC = () => {
               ) : currentWord ? (
                 <div className="flex flex-col items-center justify-between w-full h-full py-2 z-10 gap-3">
                   
-                  {/* The Cookies (Word) */}
                   <div className="flex-1 flex items-center justify-center w-full min-h-[140px]">
                      {renderCookies(currentWord)}
                   </div>
                   
-                  {/* Info Card */}
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                     className="w-full space-y-3"
                   >
-                    {/* Word Meaning */}
                     <div className="bg-white border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative">
                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full shadow-sm">
                             {currentWord.romaji.toUpperCase()}
@@ -179,12 +292,22 @@ export const VendingMachine: React.FC = () => {
                         <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-1">{currentWord.desc}</p>
                     </div>
 
-                    {/* Inspiring Sentence */}
-                    <div className="relative text-center px-2 py-1">
-                        <p className="text-purple-900 font-medium text-sm md:text-base leading-snug italic">
-                          "{currentWord.sentence}"
-                        </p>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="relative text-center px-2 py-1">
+                            <p className="text-purple-900 font-medium text-sm md:text-base leading-snug italic">
+                              "{currentWord.sentence}"
+                            </p>
+                        </div>
+                        
+                        <button 
+                            onClick={handleDownloadReceipt}
+                            className="flex items-center gap-2 bg-white text-black text-xs font-black px-4 py-2 rounded-full border-2 border-black hover:bg-gray-100 active:scale-95 transition-all shadow-[2px_2px_0_black]"
+                        >
+                            <Ticket className="w-4 h-4" />
+                            <span>GET RECEIPT</span>
+                        </button>
                     </div>
+
                   </motion.div>
                 </div>
               ) : (
@@ -196,9 +319,7 @@ export const VendingMachine: React.FC = () => {
             </AnimatePresence>
         </div>
 
-        {/* Control Panel */}
         <div className="bg-purple-800 p-6 border-t-[6px] border-black relative">
-            {/* Stripe decoration */}
             <div className="absolute top-0 left-0 w-full h-2 bg-black/20"></div>
 
             <button
@@ -225,6 +346,16 @@ export const VendingMachine: React.FC = () => {
             </div>
         </div>
       </div>
+      
+      {/* Hidden Receipt Element */}
+      <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+         <ReceiptTemplate 
+            ref={receiptRef} 
+            word={currentWord} 
+            date={new Date().toLocaleDateString('ko-KR')} 
+         />
+      </div>
+      
     </div>
   );
 };
