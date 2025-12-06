@@ -283,8 +283,8 @@
             // Static style for canvas rendering
             const cookieStyle = {
                 color: '#FACC15',
-                WebkitTextStroke: '3px #000000',
-                textShadow: '3px 3px 0px #000000',
+                WebkitTextStroke: '2.5px #000000',
+                textShadow: '2px 2px 0px #000000',
             };
 
             const renderStaticCookies = () => {
@@ -294,15 +294,17 @@
                     const top = chars.slice(0, split);
                     const bottom = chars.slice(split);
                     return (
-                        <div className="flex flex-col items-center leading-none gap-3">
-                            <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
-                            <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
+                        <div className="flex flex-col items-center leading-none gap-2">
+                             {/* Reduced font size for split words to prevent overlap */}
+                            <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
+                            <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
                         </div>
                     );
                 }
                 return (
                     <div className="flex gap-1">
-                        {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
+                        {/* Reduced font size for normal words */}
+                        {chars.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}
                     </div>
                 );
             };
@@ -321,11 +323,11 @@
                         <div className="text-white/60 text-[10px] tracking-[0.4em] font-bold">HANGEUL KWAJA</div>
                     </div>
 
-                    {/* Main Visual */}
-                    <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4 gap-8">
+                    {/* Main Visual - Increased gap to 10 */}
+                    <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4 gap-10">
                         {renderStaticCookies()}
                         
-                        <div className="bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20">
+                        <div className="bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20 mt-2">
                             {word.romaji.toUpperCase()}
                         </div>
                     </div>
@@ -409,6 +411,7 @@
                       scale: 2,
                       backgroundColor: null,
                       useCORS: true,
+                      logging: false,
                   });
                   
                   const link = document.createElement('a');
@@ -579,8 +582,8 @@
                 </div>
               </div>
 
-              {/* Hidden Photo Card Element */}
-              <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+              {/* Hidden Photo Card Element for Capture - MOVED OFF-SCREEN (Fixed Position) */}
+              <div style={{ position: 'fixed', left: '-9999px', top: 0, zIndex: -50 }}>
                  <PhotoCardTemplate 
                     ref={receiptRef} 
                     word={currentWord} 
@@ -668,7 +671,7 @@
                 <ProductShowcase />
 
                 <footer className="mt-20 text-center text-purple-400/60 text-sm">
-                   <p className="font-bold">© HANGEUL KWAJA</p>
+                   <p className="font-bold">© HANGEUL KWAJA • ver 2.1</p>
                 </footer>
 
               </div>
