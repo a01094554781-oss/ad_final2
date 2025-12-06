@@ -92,15 +92,15 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             return (
                 <div className="flex flex-col items-center leading-none gap-4">
                     {/* Compact layout for long words */}
-                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
                 </div>
             );
         }
         return (
             <div className="flex gap-2">
                 {/* Standard size */}
-                {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
+                {chars.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}
             </div>
         );
     };
@@ -109,7 +109,7 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
         <div ref={ref} className="w-[340px] h-[540px] bg-[#2E1065] relative flex flex-col items-center rounded-[30px] overflow-hidden">
             
             {/* 1. Main Visual Section (Top 60%) */}
-            <div className="w-full h-[320px] relative flex flex-col items-center justify-center p-6">
+            <div className="w-full h-[320px] relative">
                 
                 {/* Glow Effect Background */}
                 <div className="absolute inset-0 z-0" style={{
@@ -120,14 +120,17 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
                 <div className="absolute top-8 left-8 text-yellow-400 opacity-50 text-xl font-black">✦</div>
                 <div className="absolute bottom-12 right-8 text-yellow-400 opacity-50 text-lg font-black">✦</div>
 
-                {/* Header Badge */}
-                <div className="absolute top-6 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
+                {/* Header Badge - Absolutely Centered */}
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
                     <span className="text-white/80 text-[10px] tracking-[0.3em] font-bold">HANGEUL KWAJA</span>
                 </div>
 
-                {/* Word Display - Removed Transform for Stability */}
-                <div className="relative z-10 mt-4">
-                    {renderStaticCookies()}
+                {/* Word Display - Absolutely Centered (The Fix) */}
+                {/* Using inset-0 and flex center guarantees position regardless of padding calculations */}
+                <div className="absolute inset-0 z-10 flex items-center justify-center pt-8"> 
+                    <div className="w-full text-center">
+                        {renderStaticCookies()}
+                    </div>
                 </div>
             </div>
 

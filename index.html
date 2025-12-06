@@ -296,15 +296,15 @@
                     return (
                         <div className="flex flex-col items-center leading-none gap-4">
                             {/* Compact layout for long words */}
-                            <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
-                            <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
+                            <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
+                            <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
                         </div>
                     );
                 }
                 return (
                     <div className="flex gap-2">
                         {/* Standard size */}
-                        {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
+                        {chars.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}
                     </div>
                 );
             };
@@ -313,7 +313,7 @@
                 <div ref={ref} className="w-[340px] h-[540px] bg-[#2E1065] relative flex flex-col items-center rounded-[30px] overflow-hidden">
                     
                     {/* 1. Main Visual Section (Top 60%) */}
-                    <div className="w-full h-[320px] relative flex flex-col items-center justify-center p-6">
+                    <div className="w-full h-[320px] relative">
                         
                         {/* Glow Effect Background */}
                         <div className="absolute inset-0 z-0" style={{
@@ -324,21 +324,23 @@
                         <div className="absolute top-8 left-8 text-yellow-400 opacity-50 text-xl font-black">✦</div>
                         <div className="absolute bottom-12 right-8 text-yellow-400 opacity-50 text-lg font-black">✦</div>
 
-                        {/* Header Badge */}
-                        <div className="absolute top-6 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
+                        {/* Header Badge - Absolutely Centered Horizontally */}
+                        <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
                             <span className="text-white/80 text-[10px] tracking-[0.3em] font-bold">HANGEUL KWAJA</span>
                         </div>
 
-                        {/* Word Display - Removed Transform */}
-                        <div className="relative z-10 mt-4">
-                            {renderStaticCookies()}
+                        {/* Word Display - Absolutely Centered Vertically and Horizontally */}
+                        <div className="absolute inset-0 z-10 flex items-center justify-center pt-8">
+                             <div className="w-full text-center">
+                                {renderStaticCookies()}
+                             </div>
                         </div>
                     </div>
 
                     {/* 2. Info Card Section (Bottom 40%) */}
                     <div className="w-full flex-1 bg-white relative flex flex-col items-center pt-8 pb-6 px-6">
                         
-                        {/* Floating Romaji Badge - Wider (220px) */}
+                        {/* Floating Romaji Badge - Wider (220px) and fixed margin */}
                         <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-4 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)] min-w-[220px] flex justify-center items-center">
                              <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase whitespace-nowrap">
                                 {word.romaji}
@@ -542,14 +544,14 @@
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                             className="w-full space-y-3"
-                          >
-                            <div className="bg-white border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative">
-                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full shadow-sm">
-                                    {currentWord.romaji.toUpperCase()}
-                                 </div>
-                                <h2 className="text-2xl font-black text-black mt-1 leading-tight">{currentWord.en}</h2>
-                                <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-1">{currentWord.desc}</p>
-                            </div>
+                  >
+                    <div className="bg-white border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative">
+                         <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                            {currentWord.romaji.toUpperCase()}
+                         </div>
+                        <h2 className="text-2xl font-black text-black mt-1 leading-tight">{currentWord.en}</h2>
+                        <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-1">{currentWord.desc}</p>
+                    </div>
 
                             <div className="flex flex-col items-center gap-2">
                                 <div className="relative text-center px-2 py-1">
@@ -696,7 +698,7 @@
                 <ProductShowcase />
 
                 <footer className="mt-20 text-center text-purple-400/60 text-sm">
-                   <p className="font-bold">© HANGEUL KWAJA • ver 3.2</p>
+                   <p className="font-bold">© HANGEUL KWAJA • ver 3.3</p>
                 </footer>
 
               </div>
