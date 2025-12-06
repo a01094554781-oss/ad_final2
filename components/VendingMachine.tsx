@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw, Zap, Ticket } from 'lucide-react';
+import { RefreshCw, Zap, Image as ImageIcon } from 'lucide-react';
 import { WordData, WORDS } from '../data';
 import { Cookie } from './Cookie';
 import confetti from 'canvas-confetti';
-import html2canvas from 'html2canvas'; // Assuming environment has this, or usage matches script
+import html2canvas from 'html2canvas';
 
 // Sound Logic
 const playSound = (type: 'click' | 'spin' | 'pop' | 'print') => {
@@ -57,62 +57,84 @@ const playSound = (type: 'click' | 'spin' | 'pop' | 'print') => {
                 o.stop(start + 0.3);
             });
         } else if (type === 'print') {
+           // Shutter sound effect
            osc.type = 'triangle';
            osc.frequency.setValueAtTime(800, now);
-           osc.frequency.linearRampToValueAtTime(100, now + 0.5);
-           gain.gain.setValueAtTime(0.05, now);
-           gain.gain.linearRampToValueAtTime(0, now + 0.5);
+           osc.frequency.linearRampToValueAtTime(100, now + 0.1);
+           gain.gain.setValueAtTime(0.1, now);
+           gain.gain.linearRampToValueAtTime(0, now + 0.1);
            osc.start(now);
-           osc.stop(now + 0.5);
+           osc.stop(now + 0.1);
         }
     } catch (e) {
         console.error("Sound play failed", e);
     }
 };
 
-const ReceiptTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string }>(({ word, date }, ref) => {
+// Photo Card Template
+const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string }>(({ word, date }, ref) => {
     if (!word) return null;
 
+    // Static style for canvas rendering (Framer Motion doesn't capture well in html2canvas)
+    const cookieStyle = {
+        color: '#FACC15',
+        WebkitTextStroke: '3px #000000',
+        textShadow: '3px 3px 0px #000000',
+    };
+
+    const renderStaticCookies = () => {
+        const chars = word.ko.split('');
+        if (chars.length >= 4) {
+            const split = Math.ceil(chars.length / 2);
+            const top = chars.slice(0, split);
+            const bottom = chars.slice(split);
+            return (
+                <div className="flex flex-col items-center leading-none gap-2">
+                    <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
+                </div>
+            );
+        }
+        return (
+            <div className="flex gap-1">
+                {chars.map((c, i) => <span key={i} className="font-korean text-8xl" style={cookieStyle}>{c}</span>)}
+            </div>
+        );
+    };
+
     return (
-        <div ref={ref} className="bg-white p-6 w-[320px] text-black font-mono flex flex-col items-center border-b-4 border-dashed border-gray-300 relative leading-tight">
-            {/* Texture overlay */}
-            <div className="absolute inset-0 bg-[#fffdf0] opacity-50 pointer-events-none"></div>
-            
-            <div className="relative z-10 w-full flex flex-col items-center gap-4 text-center">
-                <div className="flex flex-col items-center gap-1 border-b-2 border-black w-full pb-4">
-                    <h2 className="text-xl font-bold tracking-tight uppercase">Hangeul Vending</h2>
-                    <p className="text-xs text-gray-500">{date}</p>
-                    <p className="text-xs text-gray-500">No. {Math.floor(Math.random()*10000).toString().padStart(4, '0')}</p>
-                </div>
+        <div ref={ref} className="w-[340px] h-[520px] bg-[#2E1065] relative flex flex-col items-center p-6 border-[8px] border-[#FACC15] rounded-[24px] overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-20" style={{ 
+                backgroundImage: 'radial-gradient(#FACC15 1px, transparent 1px)', 
+                backgroundSize: '20px 20px' 
+            }}></div>
 
-                <div className="py-2">
-                     {/* Font should ideally be loaded in index.html for this to render correctly in canvas */}
-                     <p className="font-korean text-5xl mb-2">{word.ko}</p>
-                     <p className="text-sm font-bold uppercase tracking-wider">[{word.romaji}]</p>
-                </div>
+            {/* Header */}
+            <div className="relative z-10 flex flex-col items-center mt-2">
+                <div className="font-korean text-3xl text-[#FACC15] drop-shadow-[2px_2px_0_#000]">한글과자</div>
+                <div className="text-white/60 text-[10px] tracking-[0.4em] font-bold">HANGEUL KWAJA</div>
+            </div>
 
-                <div className="w-full border-t border-dashed border-black py-4">
-                     <div className="flex justify-between text-sm mb-1">
-                         <span>ITEM</span>
-                         <span className="font-bold">{word.en.toUpperCase()}</span>
-                     </div>
-                     <div className="flex justify-between text-sm">
-                         <span>PRICE</span>
-                         <span>0 WON</span>
-                     </div>
-                </div>
-
-                <div className="w-full border-t border-dashed border-black pt-4 pb-2">
-                    <p className="text-xs italic leading-normal">
-                        "{word.sentence}"
-                    </p>
-                </div>
+            {/* Main Visual */}
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4">
+                {renderStaticCookies()}
                 
-                <div className="mt-2 w-full flex flex-col items-center gap-1">
-                    {/* Fake Barcode */}
-                    <div className="h-10 w-3/4 bg-black" style={{ maskImage: 'repeating-linear-gradient(90deg, black, black 2px, transparent 2px, transparent 4px)', WebkitMaskImage: 'repeating-linear-gradient(90deg, black, black 2px, transparent 2px, transparent 4px)' }}></div>
-                    <p className="text-[10px] tracking-[0.5em]">THANK YOU</p>
+                <div className="mt-6 bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20">
+                    {word.romaji.toUpperCase()}
                 </div>
+            </div>
+
+            {/* Footer */}
+            <div className="w-full bg-white/10 rounded-2xl p-5 backdrop-blur-md border border-white/20 relative z-10">
+                 <h2 className="text-white font-black text-2xl text-center mb-1 drop-shadow-md">{word.en}</h2>
+                 <p className="text-[#FACC15] text-center text-xs font-bold uppercase tracking-wider mb-3 opacity-90">{word.desc}</p>
+                 <div className="w-full h-px bg-white/20 mb-3"></div>
+                 <p className="text-white text-center text-sm italic leading-snug opacity-90">"{word.sentence}"</p>
+            </div>
+
+            <div className="mt-4 text-white/30 text-[10px] tracking-widest font-bold">
+                {date} • ORIGINAL
             </div>
         </div>
     );
@@ -178,14 +200,15 @@ export const VendingMachine: React.FC = () => {
         const canvas = await html2canvas(receiptRef.current, {
             scale: 2,
             backgroundColor: null,
+            useCORS: true,
         });
         
         const link = document.createElement('a');
-        link.download = `hangeul-receipt-${new Date().getTime()}.png`;
+        link.download = `hangeul-card-${new Date().getTime()}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
     } catch (err) {
-        console.error("Receipt generation failed", err);
+        console.error("Card generation failed", err);
     }
   };
 
@@ -303,8 +326,8 @@ export const VendingMachine: React.FC = () => {
                             onClick={handleDownloadReceipt}
                             className="flex items-center gap-2 bg-white text-black text-xs font-black px-4 py-2 rounded-full border-2 border-black hover:bg-gray-100 active:scale-95 transition-all shadow-[2px_2px_0_black]"
                         >
-                            <Ticket className="w-4 h-4" />
-                            <span>GET RECEIPT</span>
+                            <ImageIcon className="w-4 h-4" />
+                            <span>SAVE CARD</span>
                         </button>
                     </div>
 
@@ -347,9 +370,9 @@ export const VendingMachine: React.FC = () => {
         </div>
       </div>
       
-      {/* Hidden Receipt Element */}
+      {/* Hidden Card Element for Capture */}
       <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
-         <ReceiptTemplate 
+         <PhotoCardTemplate 
             ref={receiptRef} 
             word={currentWord} 
             date={new Date().toLocaleDateString('ko-KR')} 

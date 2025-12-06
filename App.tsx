@@ -18,13 +18,20 @@ function App() {
 
       <div className="relative z-10 container mx-auto px-4 max-w-4xl pt-8 md:pt-16 flex flex-col items-center">
         
-        {/* Title */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl md:text-7xl font-black text-white drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-tight">
-            <span className="text-yellow-400">Hangeul</span> Vending
+        {/* Title Section */}
+        <div className="text-center mb-10 flex flex-col items-center">
+          {/* Brand Badge */}
+          <div className="inline-block bg-yellow-400 text-black font-korean text-2xl md:text-3xl px-6 py-2 rounded-full border-4 border-black mb-4 shadow-[4px_4px_0_rgba(0,0,0,1)] transform -rotate-3 hover:scale-105 transition-transform cursor-default">
+            한글과자
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-white drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-tight uppercase leading-none">
+            Hangeul<br/>
+            <span className="text-yellow-400 text-6xl md:text-8xl">Kwaja</span>
           </h1>
-          <p className="mt-4 text-xl md:text-2xl text-purple-200 font-bold tracking-wide">
-            Get your word of the day!
+          
+          <p className="mt-6 text-lg md:text-xl text-purple-200 font-bold tracking-wide">
+            The Original Korean Alphabet Cookie
           </p>
         </div>
 
