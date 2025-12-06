@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { VendingMachine } from './components/VendingMachine';
 import { ProductShowcase } from './components/ProductShowcase';
@@ -43,7 +44,7 @@ function App() {
 
         {/* Simple Footer */}
         <footer className="mt-20 text-center text-purple-400/60 text-sm">
-           <p className="font-bold">© HANGEUL KWAJA</p>
+           <p className="font-bold">© HANGEUL KWAJA • ver 3.2</p>
         </footer>
 
       </div>

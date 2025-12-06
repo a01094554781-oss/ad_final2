@@ -125,8 +125,8 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
                     <span className="text-white/80 text-[10px] tracking-[0.3em] font-bold">HANGEUL KWAJA</span>
                 </div>
 
-                {/* Word Display */}
-                <div className="relative z-10 transform translate-y-2">
+                {/* Word Display - Removed Transform for Stability */}
+                <div className="relative z-10 mt-4">
                     {renderStaticCookies()}
                 </div>
             </div>
@@ -134,8 +134,8 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             {/* 2. Info Card Section (Bottom 40%) */}
             <div className="w-full flex-1 bg-white relative flex flex-col items-center pt-8 pb-6 px-6">
                 
-                {/* Floating Romaji Badge (Bridging the two sections) */}
-                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-10 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)] min-w-[180px] flex justify-center items-center">
+                {/* Floating Romaji Badge - Wider (220px) and fixed margin */}
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-4 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)] min-w-[220px] flex justify-center items-center">
                      <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase whitespace-nowrap">
                         {word.romaji}
                     </span>
@@ -224,12 +224,14 @@ export const VendingMachine: React.FC = () => {
     playSound('print');
     
     try {
-        // Force the element to be visible for capture if needed, though off-screen placement usually suffices
+        // Enforce a large windowWidth to simulate desktop rendering context on mobile
+        // This prevents layout shifts and font miscalculations in html2canvas
         const canvas = await html2canvas(receiptRef.current, {
             scale: 2,
             backgroundColor: null,
             useCORS: true,
             logging: false,
+            windowWidth: 1200, 
         });
         
         const link = document.createElement('a');
