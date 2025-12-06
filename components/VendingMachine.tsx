@@ -135,8 +135,8 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             <div className="w-full flex-1 bg-white relative flex flex-col items-center pt-8 pb-6 px-6">
                 
                 {/* Floating Romaji Badge (Bridging the two sections) */}
-                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-6 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)]">
-                     <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase">
+                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-10 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)] min-w-[180px] flex justify-center items-center">
+                     <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase whitespace-nowrap">
                         {word.romaji}
                     </span>
                 </div>
