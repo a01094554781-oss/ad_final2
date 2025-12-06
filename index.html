@@ -1,20 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="ko">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hangeul Kwaja - Word Snack</title>
+    <title>한글과자 - 단어 자판기</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;600&family=Jua&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel Standalone (for JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Framer Motion (UMD) -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
     <style>
       body {
         font-family: 'Fredoka', sans-serif;
         background-color: #2E1065; /* Deep Purple */
+        margin: 0;
+        overflow-x: hidden;
       }
       .font-korean {
-        font-family: 'Jua', sans-serif; /* Changed to Jua for cookie look */
+        font-family: 'Jua', sans-serif;
       }
       /* Custom Scrollbar */
       ::-webkit-scrollbar {
@@ -28,20 +48,417 @@
         border-radius: 4px;
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.1",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
     "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
     "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.25",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
     "canvas-confetti": "https://aistudiocdn.com/canvas-confetti@^1.9.4"
   }
 }
 </script>
 </head>
-  <body>
+<body>
     <div id="root"></div>
-  </body>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // --- ICONS (SVG) ---
+        const RefreshCw = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+        );
+        const Zap = ({ className, style }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        );
+        const ShoppingBag = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        );
+        const ArrowRight = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        );
+
+        // --- DATA ---
+        const WORDS = [
+          // 1 Character
+          { ko: '꿈', en: 'Dream', romaji: 'Kkum', desc: 'Hopes and sleep.', sentence: "Follow your dreams, they know the way." },
+          { ko: '별', en: 'Star', romaji: 'Byeol', desc: 'Shining light.', sentence: "You are the brightest star in someone's sky." },
+          { ko: '숲', en: 'Forest', romaji: 'Sup', desc: 'Green peace.', sentence: "Listen to the whispers of the trees." },
+          { ko: '봄', en: 'Spring', romaji: 'Bom', desc: 'New life.', sentence: "Bloom where you are planted." },
+          { ko: '시', en: 'Poem', romaji: 'Si', desc: 'Words of art.', sentence: "Your life is a beautiful poem in the making." },
+          { ko: '꽃', en: 'Flower', romaji: 'Kkot', desc: 'Nature\'s smile.', sentence: "You bloom beautifully in your own time." },
+          { ko: '달', en: 'Moon', romaji: 'Dal', desc: 'Night guardian.', sentence: "The moon reminds us that we are never truly alone." },
+
+          // 2 Characters
+          { ko: '윤슬', en: 'Sun Glitter', romaji: 'Yun-seul', desc: 'Sparkles on water.', sentence: "Shine brightly like sunlight dancing on the ocean." },
+          { ko: '낭만', en: 'Romance', romaji: 'Nang-man', desc: 'Dreamy vibe.', sentence: "Find the beauty hiding in your ordinary days." },
+          { ko: '위로', en: 'Comfort', romaji: 'Wi-ro', desc: 'Warmth for heart.', sentence: "It is okay to pause and take a deep breath today." },
+          { ko: '구름', en: 'Cloud', romaji: 'Gu-reum', desc: 'Floating softly.', sentence: "Float freely and let your worries drift away." },
+          { ko: '바다', en: 'Sea', romaji: 'Ba-da', desc: 'Endless blue.', sentence: "Let your heart be as vast and deep as the ocean." },
+          { ko: '선물', en: 'Gift', romaji: 'Seon-mul', desc: 'Joy to give.', sentence: "Your presence is the greatest present to the world." },
+          { ko: '산책', en: 'Stroll', romaji: 'San-chaek', desc: 'Walking slowly.', sentence: "Walk slowly and notice the small wonders around you." },
+          { ko: '여유', en: 'Leisure', romaji: 'Yeo-yu', desc: 'Peace of mind.', sentence: "Enjoy a moment of peace just for yourself." },
+          { ko: '새벽', en: 'Dawn', romaji: 'Sae-byeok', desc: 'Quiet start.', sentence: "Every morning brings a new beginning and new hope." },
+          { ko: '미소', en: 'Smile', romaji: 'Mi-so', desc: 'Happy face.', sentence: "A smile is the prettiest thing you can wear." },
+          { ko: '기적', en: 'Miracle', romaji: 'Gi-jeok', desc: 'Impossible wonder.', sentence: "Believe in miracles, and they will find you." },
+          { ko: '소풍', en: 'Picnic', romaji: 'So-pung', desc: 'Meal outdoors.', sentence: "Life is a picnic, enjoy every bite." },
+          { ko: '여행', en: 'Travel', romaji: 'Yeo-haeng', desc: 'Exploring new.', sentence: "Go where you feel most alive." },
+          { ko: '우주', en: 'Universe', romaji: 'U-ju', desc: 'Infinite space.', sentence: "You are the universe expressing itself as a human." },
+          { ko: '달빛', en: 'Moonlight', romaji: 'Dal-bit', desc: 'Soft night glow.', sentence: "Even in darkness, there is light to guide you." },
+          { ko: '첫눈', en: 'First Snow', romaji: 'Cheot-nun', desc: 'Winter\'s greeting.', sentence: "Make a wish when the first snow falls." },
+          { ko: '행복', en: 'Happiness', romaji: 'Haeng-bok', desc: 'Feeling good.', sentence: "Happiness blooms from within your own heart." },
+          { ko: '사랑', en: 'Love', romaji: 'Sa-rang', desc: 'Deep affection.', sentence: "Love makes the world go round." },
+          { ko: '친구', en: 'Friend', romaji: 'Chin-gu', desc: 'Companion.', sentence: "A friend is a treasure you find along the way." },
+          { ko: '노을', en: 'Sunset', romaji: 'No-eul', desc: 'Painting the sky.', sentence: "Sunsets are proof that endings can be beautiful too." },
+          { ko: '추억', en: 'Memory', romaji: 'Chu-eok', desc: 'Precious past.', sentence: "Memories warm you up from the inside." },
+          { ko: '설렘', en: 'Excitement', romaji: 'Seol-lem', desc: 'Fluttering heart.', sentence: "Embrace the butterflies in your stomach." },
+          { ko: '희망', en: 'Hope', romaji: 'Hui-mang', desc: 'Light in dark.', sentence: "Hope is a waking dream." },
+
+          // 3 Characters
+          { ko: '무지개', en: 'Rainbow', romaji: 'Mu-ji-gae', desc: 'Colors after rain.', sentence: "Beautiful things often appear after the rain." },
+          { ko: '소나기', en: 'Rain Shower', romaji: 'So-na-gi', desc: 'Refreshing splash.', sentence: "Even sudden troubles will pass quickly like a shower." },
+          { ko: '밤하늘', en: 'Night Sky', romaji: 'Bam-ha-neul', desc: 'Full of stars.', sentence: "Look up, you are made of stardust." },
+          { ko: '솜사탕', en: 'Cotton Candy', romaji: 'Som-sa-tang', desc: 'Sweet and fluffy.', sentence: "May your day be soft and sweet." },
+          { ko: '눈사람', en: 'Snowman', romaji: 'Nun-sa-ram', desc: 'Cold but friendly.', sentence: "Stay cool and bring a smile to someone today." },
+          { ko: '은하수', en: 'Milky Way', romaji: 'Eun-ha-su', desc: 'River of stars.', sentence: "Navigate your own path through the stars." },
+          { ko: '별똥별', en: 'Shooting Star', romaji: 'Byeol-ttong-byeol', desc: 'Wishing light.', sentence: "Catch a falling star and put it in your pocket." },
+          { ko: '해바라기', en: 'Sunflower', romaji: 'Hae-ba-ra-gi', desc: 'Looking at sun.', sentence: "Keep your face to the sunshine and shadows will fall behind." },
+          { ko: '꽃바람', en: 'Flower Breeze', romaji: 'Kkot-ba-ram', desc: 'Scented wind.', sentence: "Let the gentle breeze carry the scent of spring." },
+          { ko: '물안개', en: 'Water Mist', romaji: 'Mul-an-gae', desc: 'Mystical fog.', sentence: "Mystery makes things beautiful." },
+
+          // 4+ Characters
+          { ko: '작은행복', en: 'Small Happiness', romaji: 'Jak-eun-haeng-bok', desc: 'Joy in little things.', sentence: "Cherish the little moments that make you smile." },
+          { ko: '가을바람', en: 'Autumn Breeze', romaji: 'Ga-eul-ba-ram', desc: 'Cool and crisp.', sentence: "Let the wind carry your stress away." },
+          { ko: '반짝반짝', en: 'Twinkle Twinkle', romaji: 'Ban-jjak-ban-jjak', desc: 'Shining brightly.', sentence: "Don't let anyone dull your sparkle." },
+          { ko: '두근두근', en: 'Pit-a-pat', romaji: 'Du-geun-du-geun', desc: 'Heart beating fast.', sentence: "Follow the path that makes your heart beat faster." },
+          { ko: '알록달록', en: 'Colorful', romaji: 'Al-lok-dal-lok', desc: 'Many colors.', sentence: "Paint your life with all the colors of the rainbow." },
+          { ko: '하루하루', en: 'Day by day', romaji: 'Ha-ru-ha-ru', desc: 'Every single day.', sentence: "Take it one day at a time." },
+          { ko: '도란도란', en: 'Friendly Chat', romaji: 'Do-ran-do-ran', desc: 'Gathered together.', sentence: "Warm conversations make the best memories." },
+          { ko: '시나브로', en: 'Little by little', romaji: 'Si-na-beu-ro', desc: 'Unnoticed progress.', sentence: "Great things happen little by little, unnoticed." }
+        ];
+
+        // --- COMPONENTS ---
+
+        // Cookie Component
+        const Cookie = ({ char, delay }) => {
+          const textStyles = {
+            color: '#FACC15', // Bright Yellow
+            WebkitTextStroke: '2.5px #000000', // Bold Black Outline
+            textShadow: `
+              3px 3px 0px #000000,
+              rgba(0,0,0,0.2) 5px 5px 5px
+            `
+          };
+
+          return (
+            <motion.div
+              initial={{ scale: 0, rotate: -15, y: -50 }}
+              animate={{ scale: 1, rotate: 0, y: 0 }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 12,
+                delay: delay 
+              }}
+              className="relative flex items-center justify-center w-24 h-24 md:w-28 md:h-28"
+            >
+              <span 
+                className="font-korean text-7xl md:text-8xl select-none relative z-10"
+                style={textStyles}
+              >
+                {char}
+                <span className="absolute top-[8%] left-[8%] text-white opacity-40 text-7xl md:text-8xl pointer-events-none" style={{ textShadow: 'none', WebkitTextStroke: '0' }}>
+                  {char}
+                </span>
+              </span>
+            </motion.div>
+          );
+        };
+
+        // VendingMachine Component
+        const VendingMachine = () => {
+          const [currentWord, setCurrentWord] = useState(null);
+          const [isSpinning, setIsSpinning] = useState(false);
+          const [availableIndices, setAvailableIndices] = useState([]);
+
+          useEffect(() => {
+            resetDeck();
+          }, []);
+
+          const resetDeck = () => {
+            const indices = Array.from({ length: WORDS.length }, (_, i) => i);
+            setAvailableIndices(indices);
+          };
+
+          const handleDispense = () => {
+            if (isSpinning) return;
+            
+            setIsSpinning(true);
+            setCurrentWord(null); 
+
+            setTimeout(() => {
+              let nextIndices = [...availableIndices];
+              
+              if (nextIndices.length === 0) {
+                nextIndices = Array.from({ length: WORDS.length }, (_, i) => i);
+              }
+
+              const randomIndexInPool = Math.floor(Math.random() * nextIndices.length);
+              const selectedWordIndex = nextIndices[randomIndexInPool];
+              
+              nextIndices.splice(randomIndexInPool, 1);
+              
+              setAvailableIndices(nextIndices);
+              setCurrentWord(WORDS[selectedWordIndex]);
+              
+              setIsSpinning(false);
+              
+              if (window.confetti) {
+                window.confetti({
+                  particleCount: 150,
+                  spread: 80,
+                  origin: { y: 0.6 },
+                  colors: ['#FACC15', '#FFFFFF', '#000000']
+                });
+              }
+
+            }, 800);
+          };
+
+          const renderCookies = (word) => {
+            const chars = word.ko.split('');
+            const len = chars.length;
+
+            if (len >= 4) {
+              const splitIndex = Math.ceil(len / 2);
+              const topRow = chars.slice(0, splitIndex);
+              const bottomRow = chars.slice(splitIndex);
+
+              return (
+                <div className="flex flex-col gap-1 items-center -space-y-4">
+                   <div className="flex gap-1">
+                      {topRow.map((char, i) => (
+                        <Cookie key={`top-${i}`} char={char} delay={i * 0.1} />
+                      ))}
+                   </div>
+                   <div className="flex gap-1">
+                      {bottomRow.map((char, i) => (
+                        <Cookie key={`btm-${i}`} char={char} delay={(splitIndex + i) * 0.1} />
+                      ))}
+                   </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="flex flex-wrap justify-center gap-2">
+                {chars.map((char, index) => (
+                  <Cookie 
+                    key={`${word.ko}-${index}`} 
+                    char={char} 
+                    delay={index * 0.1} 
+                  />
+                ))}
+              </div>
+            );
+          };
+
+          return (
+            <div className="w-full max-w-[420px] mx-auto relative group">
+              <div className="absolute inset-0 bg-black rounded-[2.5rem] translate-x-4 translate-y-4 md:translate-x-5 md:translate-y-5"></div>
+
+              <div className="bg-yellow-400 rounded-[2.5rem] border-[6px] border-black relative overflow-hidden flex flex-col">
+                
+                <div className="bg-yellow-400 p-4 text-center border-b-[6px] border-black flex items-center justify-between px-6">
+                    <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-black"></div>
+                        <div className="w-3 h-3 rounded-full bg-white border-2 border-black"></div>
+                    </div>
+                    <span className="font-black text-black text-lg tracking-widest uppercase">TODAY'S WORD</span>
+                     <div className="flex gap-2">
+                        <div className="w-3 h-3 rounded-full bg-white border-2 border-black"></div>
+                        <div className="w-3 h-3 rounded-full bg-black"></div>
+                    </div>
+                </div>
+
+                <div className="relative min-h-[26rem] bg-purple-50 flex items-center justify-center p-6 overflow-hidden">
+                    <div className="absolute inset-0 opacity-10" 
+                        style={{ 
+                            backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', 
+                            backgroundSize: '20px 20px' 
+                        }}>
+                    </div>
+                    
+                    <AnimatePresence mode="wait">
+                      {isSpinning ? (
+                         <motion.div
+                         key="loader"
+                         initial={{ opacity: 0, scale: 0.8 }}
+                         animate={{ opacity: 1, scale: 1 }}
+                         exit={{ opacity: 0, scale: 0.8 }}
+                         className="flex flex-col items-center gap-4 z-10"
+                       >
+                         <motion.div 
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                            className="p-4 bg-black rounded-full"
+                         >
+                            <RefreshCw className="w-10 h-10 text-yellow-400" />
+                         </motion.div>
+                         <span className="text-black font-black text-xl tracking-widest animate-pulse">BAKING...</span>
+                       </motion.div>
+                      ) : currentWord ? (
+                        <div className="flex flex-col items-center justify-between w-full h-full py-2 z-10 gap-3">
+                          
+                          <div className="flex-1 flex items-center justify-center w-full min-h-[140px]">
+                             {renderCookies(currentWord)}
+                          </div>
+                          
+                          <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="w-full space-y-3"
+                          >
+                            <div className="bg-white border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative">
+                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full shadow-sm">
+                                    {currentWord.romaji.toUpperCase()}
+                                 </div>
+                                <h2 className="text-2xl font-black text-black mt-1 leading-tight">{currentWord.en}</h2>
+                                <p className="text-gray-500 text-xs font-bold uppercase tracking-wider mt-1">{currentWord.desc}</p>
+                            </div>
+
+                            <div className="relative text-center px-2 py-1">
+                                <p className="text-purple-900 font-medium text-sm md:text-base leading-snug italic">
+                                  "{currentWord.sentence}"
+                                </p>
+                            </div>
+                          </motion.div>
+                        </div>
+                      ) : (
+                        <div className="text-center z-10">
+                            <h3 className="text-4xl font-black text-black mb-2 tracking-tighter transform -rotate-2">PUSH<br/>START</h3>
+                            <p className="text-gray-400 font-bold text-sm">Find your word</p>
+                        </div>
+                      )}
+                    </AnimatePresence>
+                </div>
+
+                <div className="bg-purple-800 p-6 border-t-[6px] border-black relative">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-black/20"></div>
+
+                    <button
+                      onClick={handleDispense}
+                      disabled={isSpinning}
+                      className={`
+                        w-full group relative
+                        bg-black
+                        hover:bg-gray-900
+                        active:translate-y-2
+                        disabled:opacity-80 disabled:cursor-not-allowed
+                        text-yellow-400 font-black text-3xl tracking-widest uppercase
+                        py-6 rounded-xl shadow-[0_8px_0_#3b0764] active:shadow-none
+                        transition-all duration-100 ease-out
+                        flex items-center justify-center gap-3 border-4 border-white
+                      `}
+                    >
+                       <Zap className="w-8 h-8 fill-yellow-400 group-hover:scale-110 transition-transform" style={{ fill: '#FACC15' }} />
+                       <span>{currentWord ? 'RETRY' : 'START'}</span>
+                    </button>
+                    
+                    <div className="mt-4 text-center">
+                         <span className="text-purple-300/50 text-xs font-bold tracking-[0.2em]">INSERT COIN TO PLAY</span>
+                    </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // ProductShowcase Component
+        const ProductShowcase = () => {
+          return (
+            <div className="mt-12 w-full max-w-2xl mx-auto flex flex-col items-center px-6 text-center">
+                
+              <h3 className="text-yellow-400 font-black text-2xl md:text-3xl mb-6 tracking-wide drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">
+                Want real Hangeul Cookies?
+              </h3>
+
+              <a 
+                href="https://hangeulkwaja.com/?NaPm=ct%3Dmitw4ew1%7Cci%3Dcheckout%7Ctr%3Dds%7Ctrx%3Dnull%7Chk%3D7304ed45e84a232479073b6f5c5ccf40f557baaf" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="
+                    group relative
+                    flex items-center justify-center gap-3
+                    bg-white text-black 
+                    w-full md:w-auto
+                    px-8 py-4 
+                    rounded-full 
+                    font-black text-xl md:text-2xl 
+                    tracking-tight
+                    border-[4px] border-yellow-400
+                    hover:bg-yellow-400 hover:border-white hover:text-black
+                    transition-all duration-300
+                    shadow-[0_0_20px_rgba(250,204,21,0.3)]
+                    hover:shadow-[0_0_40px_rgba(250,204,21,0.6)]
+                "
+              >
+                <ShoppingBag className="w-6 h-6 md:w-8 md:h-8" />
+                <span>VISIT OFFICIAL STORE</span>
+                <div className="bg-black text-white rounded-full p-1 group-hover:bg-white group-hover:text-black transition-colors ml-2">
+                    <ArrowRight className="w-5 h-5" />
+                </div>
+              </a>
+              
+            </div>
+          );
+        };
+
+        // App Component
+        const App = () => {
+          return (
+            <div className="min-h-screen bg-[#2E1065] text-white pb-20 overflow-x-hidden relative selection:bg-yellow-400 selection:text-black">
+              
+              <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#581c87] rounded-full blur-[120px] opacity-50"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#000000] rounded-full blur-[100px] opacity-60"></div>
+                
+                <div className="absolute top-[20%] right-[10%] w-4 h-4 bg-yellow-400 rounded-full blur-[2px] opacity-80 animate-pulse"></div>
+                <div className="absolute bottom-[30%] left-[5%] w-6 h-6 bg-yellow-400 rounded-full blur-[4px] opacity-60"></div>
+              </div>
+
+              <div className="relative z-10 container mx-auto px-4 max-w-4xl pt-8 md:pt-16 flex flex-col items-center">
+                
+                <div className="text-center mb-10">
+                  <h1 className="text-5xl md:text-7xl font-black text-white drop-shadow-[4px_4px_0_rgba(0,0,0,1)] tracking-tight">
+                    <span className="text-yellow-400">Hangeul</span> Vending
+                  </h1>
+                  <p className="mt-4 text-xl md:text-2xl text-purple-200 font-bold tracking-wide">
+                    Get your word of the day!
+                  </p>
+                </div>
+
+                <VendingMachine />
+
+                <ProductShowcase />
+
+                <footer className="mt-20 text-center text-purple-400/60 text-sm">
+                   <p className="font-bold">© HANGEUL KWAJA</p>
+                </footer>
+
+              </div>
+            </div>
+          );
+        };
+
+        // Render
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
 </html>
