@@ -76,11 +76,11 @@ const playSound = (type: 'click' | 'spin' | 'pop' | 'print') => {
 const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string }>(({ word, date }, ref) => {
     if (!word) return null;
 
-    // Static style for canvas rendering (Framer Motion doesn't capture well in html2canvas)
+    // Static style for canvas rendering
     const cookieStyle = {
         color: '#FACC15',
-        WebkitTextStroke: '2.5px #000000',
-        textShadow: '2px 2px 0px #000000',
+        WebkitTextStroke: '2px #000000',
+        textShadow: '3px 3px 0px #000000',
     };
 
     const renderStaticCookies = () => {
@@ -90,55 +90,79 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             const top = chars.slice(0, split);
             const bottom = chars.slice(split);
             return (
-                <div className="flex flex-col items-center leading-none gap-2">
-                    {/* Reduced text size to text-5xl to prevent overlap */}
-                    <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
+                <div className="flex flex-col items-center leading-none gap-4">
+                    {/* Compact layout for long words */}
+                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div>
                 </div>
             );
         }
         return (
-            <div className="flex gap-1">
-                {/* Reduced text size to text-6xl */}
-                {chars.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}
+            <div className="flex gap-2">
+                {/* Standard size */}
+                {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
             </div>
         );
     };
 
     return (
-        <div ref={ref} className="w-[340px] h-[520px] bg-[#2E1065] relative flex flex-col items-center p-6 border-[8px] border-[#FACC15] rounded-[24px] overflow-hidden">
-            {/* Background pattern */}
-            <div className="absolute inset-0 opacity-20" style={{ 
-                backgroundImage: 'radial-gradient(#FACC15 1px, transparent 1px)', 
-                backgroundSize: '20px 20px' 
-            }}></div>
-
-            {/* Header */}
-            <div className="relative z-10 flex flex-col items-center mt-2">
-                <div className="font-korean text-3xl text-[#FACC15] drop-shadow-[2px_2px_0_#000]">한글과자</div>
-                <div className="text-white/60 text-[10px] tracking-[0.4em] font-bold">HANGEUL KWAJA</div>
-            </div>
-
-            {/* Main Visual - Increased spacing gap-10 */}
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4 gap-10">
-                {renderStaticCookies()}
+        <div ref={ref} className="w-[340px] h-[540px] bg-[#2E1065] relative flex flex-col items-center rounded-[30px] overflow-hidden">
+            
+            {/* 1. Main Visual Section (Top 60%) */}
+            <div className="w-full h-[320px] relative flex flex-col items-center justify-center p-6">
                 
-                <div className="bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20 mt-2">
-                    {word.romaji.toUpperCase()}
+                {/* Glow Effect Background */}
+                <div className="absolute inset-0 z-0" style={{
+                    background: 'radial-gradient(circle at center, rgba(250, 204, 21, 0.3) 0%, rgba(46, 16, 101, 0) 70%)'
+                }}></div>
+                
+                {/* Decorative Stars (Static CSS shapes) */}
+                <div className="absolute top-8 left-8 text-yellow-400 opacity-50 text-xl font-black">✦</div>
+                <div className="absolute bottom-12 right-8 text-yellow-400 opacity-50 text-lg font-black">✦</div>
+
+                {/* Header Badge */}
+                <div className="absolute top-6 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
+                    <span className="text-white/80 text-[10px] tracking-[0.3em] font-bold">HANGEUL KWAJA</span>
+                </div>
+
+                {/* Word Display */}
+                <div className="relative z-10 transform translate-y-2">
+                    {renderStaticCookies()}
                 </div>
             </div>
 
-            {/* Footer */}
-            <div className="w-full bg-white/10 rounded-2xl p-5 backdrop-blur-md border border-white/20 relative z-10">
-                 <h2 className="text-white font-black text-2xl text-center mb-1 drop-shadow-md">{word.en}</h2>
-                 <p className="text-[#FACC15] text-center text-xs font-bold uppercase tracking-wider mb-3 opacity-90">{word.desc}</p>
-                 <div className="w-full h-px bg-white/20 mb-3"></div>
-                 <p className="text-white text-center text-sm italic leading-snug opacity-90">"{word.sentence}"</p>
+            {/* 2. Info Card Section (Bottom 40%) */}
+            <div className="w-full flex-1 bg-white relative flex flex-col items-center pt-8 pb-6 px-6">
+                
+                {/* Floating Romaji Badge (Bridging the two sections) */}
+                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-6 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)]">
+                     <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase">
+                        {word.romaji}
+                    </span>
+                </div>
+
+                {/* Text Content */}
+                <div className="flex flex-col items-center justify-center h-full space-y-3">
+                    <div className="text-center">
+                        <h2 className="font-black text-[#2E1065] text-3xl leading-none mb-1">{word.en}</h2>
+                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">{word.desc}</p>
+                    </div>
+                    
+                    <div className="w-12 h-1 bg-gray-100 rounded-full"></div>
+
+                    <p className="text-[#581c87] text-center text-xs font-medium italic leading-relaxed px-4">
+                        "{word.sentence}"
+                    </p>
+                </div>
+
+                {/* Footer Brand */}
+                <div className="absolute bottom-4 text-gray-300 text-[9px] font-bold tracking-widest">
+                    {date} • ORIGINAL SNACK
+                </div>
             </div>
 
-            <div className="mt-4 text-white/30 text-[10px] tracking-widest font-bold">
-                {date} • ORIGINAL
-            </div>
+            {/* Outer Border (Overlay) */}
+            <div className="absolute inset-0 border-[8px] border-[#FACC15] rounded-[30px] pointer-events-none z-50"></div>
         </div>
     );
 });
