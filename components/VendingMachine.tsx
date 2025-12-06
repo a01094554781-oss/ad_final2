@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Zap, Image as ImageIcon } from 'lucide-react';
@@ -89,15 +90,15 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             const top = chars.slice(0, split);
             const bottom = chars.slice(split);
             return (
-                <div className="flex flex-col items-center leading-none gap-2">
-                    <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
+                <div className="flex flex-col items-center leading-none gap-3">
+                    <div className="flex gap-1">{top.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-1">{bottom.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
                 </div>
             );
         }
         return (
             <div className="flex gap-1">
-                {chars.map((c, i) => <span key={i} className="font-korean text-8xl" style={cookieStyle}>{c}</span>)}
+                {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
             </div>
         );
     };
@@ -117,10 +118,10 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             </div>
 
             {/* Main Visual */}
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4">
+            <div className="flex-1 flex flex-col items-center justify-center relative z-10 py-4 gap-8">
                 {renderStaticCookies()}
                 
-                <div className="mt-6 bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20">
+                <div className="bg-black text-[#FACC15] px-6 py-2 rounded-full text-sm font-black tracking-[0.2em] border-2 border-white/20">
                     {word.romaji.toUpperCase()}
                 </div>
             </div>
