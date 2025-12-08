@@ -449,10 +449,9 @@ export const VendingMachine: React.FC = () => {
       {/* HIDDEN CAPTURE ELEMENT (Z-Index Hiding Strategy) */}
       <div 
         style={{ 
-            position: 'fixed', 
-            top: '50%', 
-            left: '50%', 
-            transform: 'translate(-50%, -50%)',
+            position: 'absolute', // Changed from fixed to absolute
+            top: 0, 
+            left: 0, 
             zIndex: -50,
             pointerEvents: 'none',
             visibility: 'visible' // Must be visible for html2canvas
