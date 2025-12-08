@@ -72,15 +72,20 @@ const playSound = (type: 'click' | 'spin' | 'pop' | 'print') => {
     }
 };
 
-// Photo Card Template
-const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string }>(({ word, date }, ref) => {
+// Photo Card Template (Premium Vertical Style)
+const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | null, date: string, isLucky?: boolean }>(({ word, date, isLucky }, ref) => {
     if (!word) return null;
 
-    // Static style for canvas rendering
+    // ROBUST STROKE FIX: Use multiple text-shadows instead of WebkitTextStroke.
     const cookieStyle = {
         color: '#FACC15',
-        WebkitTextStroke: '2px #000000',
-        textShadow: '3px 3px 0px #000000',
+        textShadow: `
+            3px 3px 0 #000,
+            -1px -1px 0 #000,  
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000
+        `, 
     };
 
     const renderStaticCookies = () => {
@@ -91,81 +96,81 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             const bottom = chars.slice(split);
             return (
                 <div className="flex flex-col items-center leading-none gap-4">
-                    {/* Compact layout for long words */}
-                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-4xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
                 </div>
             );
         }
         return (
             <div className="flex gap-2">
-                {/* Standard size */}
-                {chars.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}
+                {chars.map((c, i) => <span key={i} className="font-korean text-8xl" style={cookieStyle}>{c}</span>)}
             </div>
         );
     };
 
+    // LUCKY GOLD THEME
+    const bgClass = isLucky 
+        ? "bg-gradient-to-br from-yellow-600 via-yellow-400 to-yellow-700"
+        : "bg-[#2E1065]";
+    
+    const textBaseColor = isLucky ? "text-black" : "text-white";
+
     return (
-        <div ref={ref} className="w-[340px] h-[540px] bg-[#2E1065] relative flex flex-col items-center rounded-[30px] overflow-hidden">
+        <div ref={ref} className={`w-[340px] h-[540px] ${bgClass} relative flex flex-col rounded-[30px] overflow-hidden`}>
             
-            {/* 1. Main Visual Section (Top 60%) */}
-            <div className="w-full h-[320px] relative">
-                
-                {/* Glow Effect Background */}
-                <div className="absolute inset-0 z-0" style={{
-                    background: 'radial-gradient(circle at center, rgba(250, 204, 21, 0.3) 0%, rgba(46, 16, 101, 0) 70%)'
-                }}></div>
-                
-                {/* Decorative Stars (Static CSS shapes) */}
-                <div className="absolute top-8 left-8 text-yellow-400 opacity-50 text-xl font-black">✦</div>
-                <div className="absolute bottom-12 right-8 text-yellow-400 opacity-50 text-lg font-black">✦</div>
-
-                {/* Header Badge - Absolutely Centered */}
-                <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 bg-black/30 px-3 py-1 rounded-full border border-white/20">
-                    <span className="text-white/80 text-[10px] tracking-[0.3em] font-bold">HANGEUL KWAJA</span>
-                </div>
-
-                {/* Word Display - Absolutely Centered (The Fix) */}
-                {/* Using inset-0 and flex center guarantees position regardless of padding calculations */}
-                <div className="absolute inset-0 z-10 flex items-center justify-center pt-8"> 
-                    <div className="w-full text-center">
-                        {renderStaticCookies()}
-                    </div>
-                </div>
-            </div>
-
-            {/* 2. Info Card Section (Bottom 40%) */}
-            <div className="w-full flex-1 bg-white relative flex flex-col items-center pt-8 pb-6 px-6">
-                
-                {/* Floating Romaji Badge - Wider (220px) and fixed margin */}
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#FACC15] border-4 border-[#2E1065] px-4 py-2 rounded-full z-20 shadow-[0_4px_0_rgba(0,0,0,0.2)] min-w-[220px] flex justify-center items-center">
-                     <span className="text-[#2E1065] font-black text-sm tracking-[0.15em] uppercase whitespace-nowrap">
-                        {word.romaji}
+            {/* Glow Background (Standard Only) */}
+            {!isLucky && (
+                <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[80%] bg-[#4c1d95] rounded-full blur-[80px] opacity-60 pointer-events-none"></div>
+            )}
+            
+            {/* 1. VISUAL ZONE */}
+            <div className="h-[60%] w-full relative flex flex-col items-center pt-10 z-10">
+                {/* Brand Header */}
+                <div className={`${isLucky ? 'bg-black text-[#FACC15]' : 'bg-white/10 text-white/80'} px-5 py-2 rounded-full border border-white/10 backdrop-blur-sm mb-4`}>
+                    <span className="text-xs tracking-[0.3em] font-black uppercase">
+                        {isLucky ? "★ GOLDEN TICKET ★" : "HANGEUL KWAJA"}
                     </span>
                 </div>
 
-                {/* Text Content */}
-                <div className="flex flex-col items-center justify-center h-full space-y-3">
-                    <div className="text-center">
-                        <h2 className="font-black text-[#2E1065] text-3xl leading-none mb-1">{word.en}</h2>
-                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">{word.desc}</p>
-                    </div>
-                    
-                    <div className="w-12 h-1 bg-gray-100 rounded-full"></div>
-
-                    <p className="text-[#581c87] text-center text-xs font-medium italic leading-relaxed px-4">
-                        "{word.sentence}"
-                    </p>
-                </div>
-
-                {/* Footer Brand */}
-                <div className="absolute bottom-4 text-gray-300 text-[9px] font-bold tracking-widest">
-                    {date} • ORIGINAL SNACK
+                {/* Cookie Word */}
+                <div className="flex-1 flex items-center justify-center pb-8 scale-110">
+                     {renderStaticCookies()}
                 </div>
             </div>
 
-            {/* Outer Border (Overlay) */}
-            <div className="absolute inset-0 border-[8px] border-[#FACC15] rounded-[30px] pointer-events-none z-50"></div>
+            {/* 2. INFO ZONE (Floating Card) */}
+            <div className="absolute bottom-6 left-6 right-6 bg-white rounded-[24px] p-6 shadow-2xl z-20 flex flex-col items-center text-center">
+                
+                {/* Romaji Pill */}
+                <div className="absolute -top-5 bg-black text-[#FACC15] px-6 py-2 rounded-full border-4 border-[#FACC15] shadow-lg">
+                    <span className="text-lg font-black tracking-widest uppercase">{word.romaji}</span>
+                </div>
+
+                <div className="mt-4 space-y-3 w-full">
+                    {/* Definition */}
+                    <div className="border-b-2 border-gray-100 pb-3">
+                        <h2 className="font-black text-black text-4xl leading-none tracking-tight">{word.en}</h2>
+                        <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">{word.desc}</p>
+                    </div>
+
+                    {/* Sentence */}
+                    <div className="bg-gray-50 p-3 rounded-xl w-full">
+                         <p className="text-gray-800 font-medium text-sm italic leading-tight">
+                            "{word.sentence}"
+                        </p>
+                    </div>
+                </div>
+
+                {/* Footer Date */}
+                <div className="mt-4 text-[10px] font-bold text-gray-300 tracking-[0.2em] uppercase">
+                    {date} • ORIGINAL
+                </div>
+            </div>
+
+            {/* Lucky Confetti Overlay */}
+            {isLucky && (
+                 <div className="absolute inset-0 z-0 opacity-30" style={{ backgroundImage: 'radial-gradient(#FFF 2px, transparent 2px)', backgroundSize: '20px 20px' }}></div>
+            )}
         </div>
     );
 });
@@ -173,8 +178,10 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
 export const VendingMachine: React.FC = () => {
   const [currentWord, setCurrentWord] = useState<WordData | null>(null);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isLucky, setIsLucky] = useState(false);
   const [availableIndices, setAvailableIndices] = useState<number[]>([]);
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     resetDeck();
@@ -192,6 +199,7 @@ export const VendingMachine: React.FC = () => {
     playSound('spin');
     setIsSpinning(true);
     setCurrentWord(null); 
+    setIsLucky(false);
 
     setTimeout(() => {
       let nextIndices = [...availableIndices];
@@ -203,6 +211,10 @@ export const VendingMachine: React.FC = () => {
       const randomIndexInPool = Math.floor(Math.random() * nextIndices.length);
       const selectedWordIndex = nextIndices[randomIndexInPool];
       
+      // Lucky Logic (10% Chance)
+      const luckyChance = Math.random() < 0.1;
+      setIsLucky(luckyChance);
+
       nextIndices.splice(randomIndexInPool, 1);
       
       setAvailableIndices(nextIndices);
@@ -212,10 +224,10 @@ export const VendingMachine: React.FC = () => {
       playSound('pop');
       
       confetti({
-        particleCount: 150,
-        spread: 80,
+        particleCount: luckyChance ? 300 : 150,
+        spread: luckyChance ? 120 : 80,
         origin: { y: 0.6 },
-        colors: ['#FACC15', '#FFFFFF', '#000000']
+        colors: luckyChance ? ['#FFD700', '#FACC15', '#FFFFFF'] : ['#FACC15', '#FFFFFF', '#000000']
       });
 
     }, 800);
@@ -223,18 +235,20 @@ export const VendingMachine: React.FC = () => {
 
   const handleDownloadReceipt = async () => {
     if (!receiptRef.current || !currentWord) return;
+    
+    setIsDownloading(true);
     playSound('click');
     playSound('print');
     
     try {
-        // Enforce a large windowWidth to simulate desktop rendering context on mobile
-        // This prevents layout shifts and font miscalculations in html2canvas
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait for render
+        
         const canvas = await html2canvas(receiptRef.current, {
-            scale: 2,
+            scale: 3, // High resolution
             backgroundColor: null,
             useCORS: true,
             logging: false,
-            windowWidth: 1200, 
+            windowWidth: 1600, // Enforce desktop context
         });
         
         const link = document.createElement('a');
@@ -243,6 +257,9 @@ export const VendingMachine: React.FC = () => {
         link.click();
     } catch (err) {
         console.error("Card generation failed", err);
+        alert("Image generation failed. Please try again.");
+    } finally {
+        setIsDownloading(false);
     }
   };
 
@@ -288,20 +305,27 @@ export const VendingMachine: React.FC = () => {
     <div className="w-full max-w-[420px] mx-auto relative group">
       <div className="absolute inset-0 bg-black rounded-[2.5rem] translate-x-4 translate-y-4 md:translate-x-5 md:translate-y-5"></div>
 
-      <div className="bg-yellow-400 rounded-[2.5rem] border-[6px] border-black relative overflow-hidden flex flex-col">
+      <div className={`
+        rounded-[2.5rem] border-[6px] border-black relative overflow-hidden flex flex-col transition-colors duration-500
+        ${isLucky ? 'bg-yellow-500' : 'bg-yellow-400'}
+      `}>
         
-        <div className="bg-yellow-400 p-4 text-center border-b-[6px] border-black flex items-center justify-between px-6">
+        {/* Header */}
+        <div className={`p-4 text-center border-b-[6px] border-black flex items-center justify-between px-6 ${isLucky ? 'bg-yellow-500' : 'bg-yellow-400'}`}>
             <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-black"></div>
                 <div className="w-3 h-3 rounded-full bg-white border-2 border-black"></div>
             </div>
-            <span className="font-black text-black text-lg tracking-widest uppercase">TODAY'S WORD</span>
+            <span className="font-black text-black text-lg tracking-widest uppercase">
+                {isLucky ? "★ LUCKY DRAW ★" : "TODAY'S WORD"}
+            </span>
              <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-white border-2 border-black"></div>
                 <div className="w-3 h-3 rounded-full bg-black"></div>
             </div>
         </div>
 
+        {/* Display Screen */}
         <div className="relative min-h-[26rem] bg-purple-50 flex items-center justify-center p-6 overflow-hidden">
             <div className="absolute inset-0 opacity-10" 
                 style={{ 
@@ -331,7 +355,7 @@ export const VendingMachine: React.FC = () => {
               ) : currentWord ? (
                 <div className="flex flex-col items-center justify-between w-full h-full py-2 z-10 gap-3">
                   
-                  <div className="flex-1 flex items-center justify-center w-full min-h-[140px]">
+                  <div className="flex-1 flex items-center justify-center w-full min-h-[140px] scale-110">
                      {renderCookies(currentWord)}
                   </div>
                   
@@ -341,7 +365,8 @@ export const VendingMachine: React.FC = () => {
                     transition={{ delay: 0.4 }}
                     className="w-full space-y-3"
                   >
-                    <div className="bg-white border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative">
+                    {/* Result Info Box */}
+                    <div className={`border-4 border-black p-3 pb-4 rounded-xl text-center shadow-[4px_4px_0_rgba(0,0,0,0.15)] relative ${isLucky ? 'bg-yellow-200' : 'bg-white'}`}>
                          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-yellow-400 text-xs font-black px-3 py-1 rounded-full shadow-sm">
                             {currentWord.romaji.toUpperCase()}
                          </div>
@@ -358,10 +383,24 @@ export const VendingMachine: React.FC = () => {
                         
                         <button 
                             onClick={handleDownloadReceipt}
-                            className="flex items-center gap-2 bg-white text-black text-xs font-black px-4 py-2 rounded-full border-2 border-black hover:bg-gray-100 active:scale-95 transition-all shadow-[2px_2px_0_black]"
+                            disabled={isDownloading}
+                            className={`
+                                flex items-center gap-2 bg-white text-black text-xs font-black px-5 py-3 rounded-full border-2 border-black 
+                                hover:bg-gray-100 active:scale-95 transition-all shadow-[2px_2px_0_black]
+                                disabled:opacity-50 disabled:cursor-wait
+                            `}
                         >
-                            <ImageIcon className="w-4 h-4" />
-                            <span>SAVE CARD</span>
+                            {isDownloading ? (
+                                <>
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                    <span>SAVING...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ImageIcon className="w-4 h-4" />
+                                    <span>SAVE CARD</span>
+                                </>
+                            )}
                         </button>
                     </div>
 
@@ -376,7 +415,8 @@ export const VendingMachine: React.FC = () => {
             </AnimatePresence>
         </div>
 
-        <div className="bg-purple-800 p-6 border-t-[6px] border-black relative">
+        {/* Control Panel */}
+        <div className={`p-6 border-t-[6px] border-black relative transition-colors duration-500 ${isLucky ? 'bg-yellow-700' : 'bg-purple-800'}`}>
             <div className="absolute top-0 left-0 w-full h-2 bg-black/20"></div>
 
             <button
@@ -389,34 +429,40 @@ export const VendingMachine: React.FC = () => {
                 active:translate-y-2
                 disabled:opacity-80 disabled:cursor-not-allowed
                 text-yellow-400 font-black text-3xl tracking-widest uppercase
-                py-6 rounded-xl shadow-[0_8px_0_#3b0764] active:shadow-none
+                py-6 rounded-xl shadow-[0_8px_0_rgba(0,0,0,0.5)] active:shadow-none
                 transition-all duration-100 ease-out
                 flex items-center justify-center gap-3 border-4 border-white
               `}
             >
-               <Zap className="w-8 h-8 fill-yellow-400 group-hover:scale-110 transition-transform" />
+               <Zap className={`w-8 h-8 fill-yellow-400 group-hover:scale-110 transition-transform ${isSpinning ? 'animate-pulse' : ''}`} />
                <span>{currentWord ? 'RETRY' : 'START'}</span>
             </button>
             
             <div className="mt-4 text-center">
-                 <span className="text-purple-300/50 text-xs font-bold tracking-[0.2em]">INSERT COIN TO PLAY</span>
+                 <span className={`${isLucky ? 'text-yellow-200' : 'text-purple-300/50'} text-xs font-bold tracking-[0.2em]`}>
+                    INSERT COIN TO PLAY
+                 </span>
             </div>
         </div>
       </div>
       
-      {/* Hidden Card Element for Capture - MOVED OFF-SCREEN (Not opacity 0) to allow correct rendering */}
+      {/* HIDDEN CAPTURE ELEMENT (Z-Index Hiding Strategy) */}
       <div 
         style={{ 
             position: 'fixed', 
-            top: 0, 
-            left: '-9999px', 
-            zIndex: -50 
+            top: '50%', 
+            left: '50%', 
+            transform: 'translate(-50%, -50%)',
+            zIndex: -50,
+            pointerEvents: 'none',
+            visibility: 'visible' // Must be visible for html2canvas
         }}
       >
          <PhotoCardTemplate 
             ref={receiptRef} 
             word={currentWord} 
             date={new Date().toLocaleDateString('ko-KR')} 
+            isLucky={isLucky}
          />
       </div>
       

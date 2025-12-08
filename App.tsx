@@ -44,7 +44,7 @@ function App() {
 
         {/* Simple Footer */}
         <footer className="mt-20 text-center text-purple-400/60 text-sm">
-           <p className="font-bold">© HANGEUL KWAJA • ver 3.3</p>
+           <p className="font-bold">© HANGEUL KWAJA • ver 5.4</p>
         </footer>
 
       </div>
