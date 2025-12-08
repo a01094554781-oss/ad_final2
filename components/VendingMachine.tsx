@@ -96,14 +96,14 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             const bottom = chars.slice(split);
             return (
                 <div className="flex flex-col items-center leading-none gap-4">
-                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
+                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
                 </div>
             );
         }
         return (
             <div className="flex gap-2">
-                {chars.map((c, i) => <span key={i} className="font-korean text-8xl" style={cookieStyle}>{c}</span>)}
+                {chars.map((c, i) => <span key={i} className="font-korean text-7xl" style={cookieStyle}>{c}</span>)}
             </div>
         );
     };
@@ -113,8 +113,6 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
         ? "bg-gradient-to-br from-yellow-600 via-yellow-400 to-yellow-700"
         : "bg-[#2E1065]";
     
-    const textBaseColor = isLucky ? "text-black" : "text-white";
-
     return (
         <div ref={ref} className={`w-[340px] h-[540px] ${bgClass} relative flex flex-col rounded-[30px] overflow-hidden`}>
             
@@ -124,7 +122,7 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             )}
             
             {/* 1. VISUAL ZONE */}
-            <div className="h-[60%] w-full relative flex flex-col items-center pt-10 z-10">
+            <div className="h-[55%] w-full relative flex flex-col items-center pt-8 z-10">
                 {/* Brand Header */}
                 <div className={`${isLucky ? 'bg-black text-[#FACC15]' : 'bg-white/10 text-white/80'} px-5 py-2 rounded-full border border-white/10 backdrop-blur-sm mb-4`}>
                     <span className="text-xs tracking-[0.3em] font-black uppercase">
@@ -132,8 +130,8 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
                     </span>
                 </div>
 
-                {/* Cookie Word */}
-                <div className="flex-1 flex items-center justify-center pb-8 scale-110">
+                {/* Cookie Word - Reduced Height Zone (55%) and Removed Scale to prevent overlap */}
+                <div className="flex-1 flex items-center justify-center pb-4">
                      {renderStaticCookies()}
                 </div>
             </div>
@@ -449,12 +447,12 @@ export const VendingMachine: React.FC = () => {
       {/* HIDDEN CAPTURE ELEMENT (Z-Index Hiding Strategy) */}
       <div 
         style={{ 
-            position: 'absolute', // Changed from fixed to absolute
+            position: 'absolute', 
             top: 0, 
             left: 0, 
             zIndex: -50,
             pointerEvents: 'none',
-            visibility: 'visible' // Must be visible for html2canvas
+            visibility: 'visible' 
         }}
       >
          <PhotoCardTemplate 
