@@ -95,9 +95,9 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
             const top = chars.slice(0, split);
             const bottom = chars.slice(split);
             return (
-                <div className="flex flex-col items-center leading-none gap-4">
-                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
-                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-6xl" style={cookieStyle}>{c}</span>)}</div>
+                <div className="flex flex-col items-center leading-none gap-2"> {/* Reduced gap */}
+                    <div className="flex gap-2">{top.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div> {/* text-6xl -> text-5xl */}
+                    <div className="flex gap-2">{bottom.map((c, i) => <span key={i} className="font-korean text-5xl" style={cookieStyle}>{c}</span>)}</div> {/* text-6xl -> text-5xl */}
                 </div>
             );
         }
@@ -130,8 +130,9 @@ const PhotoCardTemplate = React.forwardRef<HTMLDivElement, { word: WordData | nu
                     </span>
                 </div>
 
-                {/* Cookie Word - Reduced Height Zone (55%) and Removed Scale to prevent overlap */}
-                <div className="flex-1 flex items-center justify-center pb-4">
+                {/* Cookie Word - TOP ANCHORED to prevent overlapping bottom */}
+                {/* justify-start + pt-4 ensures it hangs from top and doesn't grow down into the pill */}
+                <div className="flex-1 flex items-start justify-center pt-4 w-full">
                      {renderStaticCookies()}
                 </div>
             </div>
